@@ -24,7 +24,7 @@ class User(db.Model):
 
     # Relationships
     group = db.relationship("Group", back_populates="members")
-    contribution = db.relationship("Contribution", back_populates="member", cascade="all, delete-orphan")
+    contributions = db.relationship("Contribution", back_populates="member", cascade="all, delete-orphan")
     loans = db.relationship("Loan", back_populates="member", cascade="all, delete-orphan")
 
 
