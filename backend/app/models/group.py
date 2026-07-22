@@ -21,3 +21,4 @@ class Group(db.Model):
     members = db.relationship("User", back_populates="group", cascade="all, delete-orphan")
     cycles = db.relationship("Cycle", back_populates="group", cascade="all, delete-orphan")
     loans = db.relationship("Loan", back_populates="group", cascade="all, delete-orphan")
+    mpesa_statements = db.relationship("MpesaStatement", back_populates="group", cascade="all, delete-orphan")
