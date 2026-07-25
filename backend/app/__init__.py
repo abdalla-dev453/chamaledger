@@ -13,11 +13,15 @@ def create_app(config_class=Config):
     jwt.init_app(app)
 
     # Register models 
-    from app import models
+    from app import models 
 
-    # REgister Blueprints
+    # Import Blueprints
     from app.api.v1.auth import auth_bp
+    from app.api.v1.cycles import cycle_bp
+
+    # Register Blueprints
     app.register_blueprint(auth_bp)
+    app.register_blueprint(cycle_bp)
 
     # Custom JWT Error Handlers
     @jwt.unauthorized_loader

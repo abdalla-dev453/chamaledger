@@ -17,7 +17,9 @@ class User(db.Model):
     joined_on = db.Column(db.Date, nullable=False, default=date.today)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    
 
+    # indexes
     __table_args__ = (
         db.UniqueConstraint("group_id", "phone_number", name="uq_group_phone"),
     )
