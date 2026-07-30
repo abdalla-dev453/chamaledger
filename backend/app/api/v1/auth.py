@@ -1,4 +1,4 @@
-# app/api/v1/auth.py
+import uuid
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, get_jwt
 from app.extensions import db
@@ -31,7 +31,10 @@ def register():
 
     # Handle Group assignment or creation
     if group_id:
-        group = db.session.get(Group, group_id)
+        try:
+            group = db.session.get(Group, uuid.UUID(str(group_id)))
+        except ValueError:
+            return jsonify({"error": "Bad Request", "message": "group_id must be a valid UUID"}), 400
         if not group:
             return jsonify({"error": "Not Found", "message": "Specified group does not exist"}), 404
         user_role = UserRole.MEMBER
@@ -83,7 +86,6 @@ def register():
             "full_name": new_user.full_name,
             "phone_number": new_user.phone_number,
             "role": new_user.role.value,
-            "group_id": str(group.id),
         }
     }), 201
 
@@ -126,9 +128,8 @@ def login():
             "full_name": user.full_name,
             "phone_number": user.phone_number,
             "role": user.role.value,
-            "group_id": str(user.group_id),
         }
-    }), 201
+    }), 200
 
 
 # Logout
@@ -143,7 +144,7 @@ def logout():
 def get_current_user():
     """Returns profile info for current authenticated token."""
     user_id = get_jwt_identity()
-    user = db.session.get(User, user_id)
+    user = db.session.get(User, uuid.UUID(user_id))
 
     if not user:
         return jsonify({"error": "Not Found", "message": "User not found."}), 404
