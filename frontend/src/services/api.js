@@ -2,7 +2,7 @@
 // Thin fetch wrapper over the ChamaLedger Flask API (see backend/app/api/v1/*).
 // Every namespaced method here maps 1:1 to a real backend route.
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000"; // must match backend's API_PREFIX
 
 // Must match the `name` used in the zustand persist config in store/useAuthStore.js.
 const AUTH_STORAGE_KEY = "chamaledger-auth";

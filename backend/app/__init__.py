@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from app.config import Config
 from app.extensions import db, migrate, jwt
 
@@ -11,6 +12,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
+    CORS(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}}, supports_credentials=True)
 
     # Register models 
     from app import models 
@@ -19,7 +21,6 @@ def create_app(config_class=Config):
     from app.api.v1.auth import auth_bp
     from app.api.v1.cycles import cycle_bp
     from app.api.v1.loans import loans_bp
-    from app.api.v1.mpesa import mpesa_bp
     from app.api.v1.reconcile import reconcile_bp
     from app.api.v1.contributions import contributions_bp
     from app.api.v1.groups import groups_bp
@@ -28,7 +29,6 @@ def create_app(config_class=Config):
     app.register_blueprint(auth_bp)
     app.register_blueprint(cycle_bp)
     app.register_blueprint(loans_bp)
-    app.register_blueprint(mpesa_bp)
     app.register_blueprint(reconcile_bp)
     app.register_blueprint(contributions_bp)
     app.register_blueprint(groups_bp)

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, ChevronDown, LayoutGrid, RefreshCw, LogOut, Users, HandCoins, CircleDollarSign } from "lucide-react";
+import { Bell, ChevronDown, LayoutGrid, RefreshCw, LogOut, Users, HandCoins, CircleDollarSign, Menu, X } from "lucide-react";
 import { useAuthStore } from "../../store/useAuthStore";
 
 const NAV_LINKS = [
@@ -10,35 +10,41 @@ const NAV_LINKS = [
   { to: "/loans", label: "Loans", icon: HandCoins },
 ];
 
-const linkClasses = ({ isActive }) =>
-  `flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-    isActive ? "bg-white/10 text-white" : "text-white/55 hover:text-white"
-  }`;
+const linkClasses = ({ isActive }) => {
+  const base = "flex items-center gap-2.5 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200";
+  return isActive 
+    ? `${base} bg-emerald-500/10 text-emerald-400 border border-emerald-500/20` 
+    : `${base} text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200 border border-transparent`;
+};
 
 export default function Navbar() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleLogout = () => {
     setMenuOpen(false);
+    setMobileNavOpen(false);
     logout();
     navigate("/login", { replace: true });
   };
 
   return (
-    <header className="sticky top-0 z-20 border-b border-white/[0.06] bg-[var(--color-ink-950)]/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-3 sm:px-8 lg:px-10">
-        <div className="flex items-center gap-6">
-          <span className="flex items-center gap-2 font-display text-lg font-semibold text-white">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--color-plum-400)] to-[var(--color-plum-600)]">
-              <CircleDollarSign className="h-4.5 w-4.5" aria-hidden="true" />
+    <header className="sticky top-0 z-40 w-full border-b border-zinc-800 bg-zinc-950/75 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+        
+        {/* Left Side: Brand & Desktop Navigation */}
+        <div className="flex items-center gap-8">
+          <span className="flex items-center gap-2.5 text-base font-semibold tracking-tight text-white">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-400 to-blue-600 shadow-md shadow-emerald-900/20">
+              <CircleDollarSign className="h-4.5 w-4.5 text-zinc-950" aria-hidden="true" />
             </span>
             ChamaLedger
           </span>
 
-          <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+          <nav aria-label="Desktop Primary" className="hidden items-center gap-1.5 md:flex">
             {NAV_LINKS.map(({ to, label, icon: Icon, end }) => (
               <NavLink key={to} to={to} end={end} className={linkClasses}>
                 <Icon className="h-4 w-4" aria-hidden="true" />
@@ -54,51 +60,50 @@ export default function Navbar() {
           </nav>
         </div>
 
+        {/* Right Side: Quick Tools & Profile Dropdowns */}
         <div className="flex items-center gap-3">
           <button
             type="button"
             aria-label="Notifications"
-            className="flex h-10 w-10 items-center justify-center rounded-full glass-panel text-white/80 transition-colors hover:text-white"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/50 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
           >
-            <Bell className="h-4.5 w-4.5" aria-hidden="true" />
+            <Bell className="h-4 w-4" aria-hidden="true" />
           </button>
 
-          <div className="relative">
+          {/* User Account Controls */}
+          <div className="relative hidden sm:block">
             <button
               type="button"
               onClick={() => setMenuOpen((v) => !v)}
               aria-haspopup="menu"
               aria-expanded={menuOpen}
-              className="flex items-center gap-2 rounded-full glass-panel py-1.5 pl-1.5 pr-3 text-left"
+              className="flex items-center gap-2.5 rounded-xl border border-zinc-800 bg-zinc-900/40 py-1 pl-1 pr-3 text-left transition-colors hover:bg-zinc-900/80"
             >
-              <span
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-plum-400)] to-[var(--color-plum-600)] font-display text-sm font-semibold"
-                aria-hidden="true"
-              >
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-zinc-800 font-medium text-xs text-zinc-200">
                 {user?.full_name?.charAt(0) ?? "?"}
               </span>
-              <span className="hidden leading-tight sm:block">
-                <span className="block text-sm font-semibold text-white">{user?.full_name ?? "Member"}</span>
-                <span className="block text-xs capitalize text-[var(--color-gold-300)]">{user?.role}</span>
+              <span className="leading-tight">
+                <span className="block text-xs font-medium text-zinc-200">{user?.full_name ?? "Member"}</span>
+                <span className="block text-[10px] uppercase tracking-wider text-blue-600 font-semibold">{user?.role}</span>
               </span>
-              <ChevronDown className="h-4 w-4 text-white/50" aria-hidden="true" />
+              <ChevronDown className="h-3.5 w-3.5 text-zinc-500" aria-hidden="true" />
             </button>
 
             <AnimatePresence>
               {menuOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.15 }}
+                  initial={{ opacity: 0, scale: 0.95, y: 4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 4 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
                   role="menu"
-                  className="absolute right-0 mt-2 w-44 overflow-hidden rounded-2xl glass-panel p-1 shadow-xl shadow-black/40"
+                  className="absolute right-0 mt-2 w-48 overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 p-1.5 shadow-xl shadow-black/50"
                 >
                   <button
                     type="button"
                     role="menuitem"
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-red-400 transition-colors hover:bg-red-500/10"
                   >
                     <LogOut className="h-4 w-4" aria-hidden="true" />
                     Log out
@@ -107,24 +112,63 @@ export default function Navbar() {
               )}
             </AnimatePresence>
           </div>
+
+          {/* Mobile Hambuger Button */}
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen((v) => !v)}
+            aria-label="Toggle Menu"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/50 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 md:hidden"
+          >
+            {mobileNavOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          </button>
         </div>
       </div>
 
-      {/* Mobile nav */}
-      <nav aria-label="Primary" className="flex items-center gap-1 overflow-x-auto px-5 pb-3 md:hidden">
-        {NAV_LINKS.map(({ to, label, icon: Icon, end }) => (
-          <NavLink key={to} to={to} end={end} className={linkClasses}>
-            <Icon className="h-4 w-4" aria-hidden="true" />
-            {label}
-          </NavLink>
-        ))}
-        {user?.role === "treasurer" && (
-          <NavLink to="/reconcile" className={linkClasses}>
-            <RefreshCw className="h-4 w-4" aria-hidden="true" />
-            Reconcile
-          </NavLink>
+      {/* Mobile Sidebar Flyout Panel Overlay */}
+      <AnimatePresence>
+        {mobileNavOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="border-t border-zinc-800 bg-zinc-950 px-4 py-4 md:hidden overflow-hidden"
+          >
+            <nav aria-label="Mobile Primary" className="flex flex-col gap-1.5">
+              {NAV_LINKS.map(({ to, label, icon: Icon, end }) => (
+                <NavLink key={to} to={to} end={end} onClick={() => setMobileNavOpen(false)} className={linkClasses}>
+                  <Icon className="h-4 w-4" aria-hidden="true" />
+                  {label}
+                </NavLink>
+              ))}
+              {user?.role === "treasurer" && (
+                <NavLink to="/reconcile" onClick={() => setMobileNavOpen(false)} className={linkClasses}>
+                  <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                  Reconcile
+                </NavLink>
+              )}
+              <div className="h-px bg-zinc-800 my-2" />
+              <div className="flex items-center gap-3 px-3 py-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-800 font-medium text-xs text-zinc-200">
+                  {user?.full_name?.charAt(0) ?? "?"}
+                </span>
+                <div className="leading-tight flex-1">
+                  <span className="block text-sm font-medium text-zinc-200">{user?.full_name ?? "Member"}</span>
+                  <span className="block text-xs uppercase text-blue-600 font-semibold">{user?.role}</span>
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="p-1.5 text-zinc-500 hover:text-red-400 transition-colors"
+                  aria-label="Logout"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            </nav>
+          </motion.div>
         )}
-      </nav>
+      </AnimatePresence>
     </header>
   );
 }
