@@ -3,9 +3,25 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 class Config:
-    SECRET_KEY = os.getenv('SECRET_KEY', "abdalla-dev-secret-key")
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL') or os.getenv('SQLALCHEMY_DATABASE_URI', "sqlite:///chamaledger.db")
+    SECRET_KEY = os.getenv("SECRET_KEY", "abdalla-dev-secret-key")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or os.getenv(
+        "SQLALCHEMY_DATABASE_URI",
+        "sqlite:///chamaledger.db",
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', "abdalla-dev-jwt-secret-key")
-    CORS_ORIGINS = os.getenv('CORS_ORIGINS', 'http://localhost:5173,http://localhost:4173,http://localhost:5176').split(',')
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "abdalla-dev-jwt-secret-key")
+
+    default_origins = (
+        "http://localhost:5173,"
+        "http://localhost:4173,"
+        "http://localhost:5174,"
+        "http://localhost:3000"
+    )
+
+    CORS_ORIGINS = [
+        origin.strip()
+        for origin in os.getenv("CORS_ORIGINS", default_origins).split(",")
+        if origin.strip()
+    ]
