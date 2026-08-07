@@ -1,5 +1,5 @@
+import { Monitor, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Sun, Moon, Monitor } from "lucide-react";
 
 const THEMES = [
   { id: "light", label: "Light", icon: Sun },
@@ -9,7 +9,11 @@ const THEMES = [
 
 export default function ThemeToggle() {
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("theme") || "system";
+    try {
+      return window?.localStorage?.getItem("theme") || "system";
+    } catch {
+      return "system";
+    }
   });
 
   useEffect(() => {
@@ -19,7 +23,8 @@ export default function ThemeToggle() {
       root.classList.remove("light", "dark");
 
       if (targetTheme === "system") {
-        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+          .matches
           ? "dark"
           : "light";
         root.classList.add(systemTheme);
@@ -29,7 +34,14 @@ export default function ThemeToggle() {
     };
 
     applyTheme(theme);
-    localStorage.setItem("theme", theme);
+    try {
+      window.localStorage.setItem("theme", theme);
+    } catch {}
+
+    // Notify other ThemeToggle instances on the same page to stay in sync
+    try {
+      window.dispatchEvent(new CustomEvent("themechange", { detail: theme }));
+    } catch {}
 
     // Listen for system theme changes if set to 'system'
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -39,8 +51,24 @@ export default function ThemeToggle() {
       }
     };
 
-    mediaQuery.addEventListener("change", handleSystemChange);
-    return () => mediaQuery.removeEventListener("change", handleSystemChange);
+    // addEventListener on MediaQueryList is modern; fallback to addListener for older browsers
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleSystemChange);
+      return () => mediaQuery.removeEventListener("change", handleSystemChange);
+    } else if (typeof mediaQuery.addListener === "function") {
+      mediaQuery.addListener(handleSystemChange);
+      return () => mediaQuery.removeListener(handleSystemChange);
+    }
+    return undefined;
+  }, [theme]);
+
+  // Keep multiple ThemeToggle components in sync within the same page
+  useEffect(() => {
+    const onThemeChange = (e) => {
+      if (e?.detail && e.detail !== theme) setTheme(e.detail);
+    };
+    window.addEventListener("themechange", onThemeChange);
+    return () => window.removeEventListener("themechange", onThemeChange);
   }, [theme]);
 
   return (

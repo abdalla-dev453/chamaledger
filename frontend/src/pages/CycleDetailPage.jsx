@@ -1,29 +1,26 @@
-import { useState } from "react";
-import { useNavigate, useParams } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  ChevronDown, 
-  Lock, 
-  Plus, 
-  Wallet, 
-  AlertCircle, 
-  CheckCircle2,
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  AlertCircle,
   Calendar,
+  CheckCircle2,
+  ChevronDown,
   Layers,
-  ArrowRight,
-  X,
+  Lock,
+  PieChart,
+  Plus,
   Save,
-  Clock,
-  TrendingUp,
-  PieChart
+  Wallet,
+  X,
 } from "lucide-react";
-import { useAuthStore } from "../store/useAuthStore";
-import { useCycles, useCycleSummary } from "../hooks/useCycles";
-import { api, ApiError } from "../services/api";
-import { formatKES, formatDate } from "../utils/formatters";
+import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import GlassCard from "../components/ui/GlassCard";
 import StatusChip from "../components/ui/StatusChip";
 import Table from "../components/ui/Table";
+import { useCycles, useCycleSummary } from "../hooks/useCycles";
+import { api, ApiError } from "../services/api";
+import { useAuthStore } from "../store/useAuthStore";
+import { formatDate, formatKES } from "../utils/formatters";
 
 const inputClasses =
   "w-full rounded-xl border border-slate-700/80 bg-slate-950/80 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 outline-none transition-all duration-200 focus:border-emerald-500/80 focus:ring-2 focus:ring-emerald-500/20";
@@ -46,7 +43,9 @@ function CreateCycleForm({ groupId, onCreated }) {
       });
       onCreated(cycle.id);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not create the cycle.");
+      setError(
+        err instanceof ApiError ? err.message : "Could not create the cycle.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -55,40 +54,67 @@ function CreateCycleForm({ groupId, onCreated }) {
   return (
     <div className="relative min-h-[80vh] flex items-center justify-center p-4">
       <div className="pointer-events-none absolute h-96 w-96 rounded-full bg-emerald-500/10 blur-[140px]" />
-      
-      <GlassCard index={0} className="w-full max-w-md border-slate-800/80 bg-slate-900/80 p-8 backdrop-blur-xl relative z-10 shadow-2xl">
+
+      <GlassCard
+        index={0}
+        className="w-full max-w-md border-slate-800/80 bg-slate-900/80 p-8 backdrop-blur-xl relative z-10 shadow-2xl"
+      >
         <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-bold text-emerald-400 mb-4">
           <Calendar className="h-3.5 w-3.5" /> Cycle Setup
         </div>
-        <h1 className="font-display text-2xl font-black text-white tracking-tight">Open New Cycle</h1>
+        <h1 className="font-display text-2xl font-black text-white tracking-tight">
+          Open New Cycle
+        </h1>
         <p className="mt-1 text-xs text-slate-400 font-medium leading-relaxed">
-          Specify start and end dates. Members will submit contributions against this target window.
+          Specify start and end dates. Members will submit contributions against
+          this target window.
         </p>
 
         {error && (
-          <motion.div 
-            initial={{ opacity: 0, y: -5 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            role="alert" 
+          <motion.div
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            role="alert"
             className="mt-4 flex items-center gap-2.5 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs font-medium text-rose-300"
           >
-            <AlertCircle className="h-4 w-4 flex-none text-rose-400" aria-hidden="true" />
+            <AlertCircle
+              className="h-4 w-4 flex-none text-rose-400"
+              aria-hidden="true"
+            />
             <span>{error}</span>
           </motion.div>
         )}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
-            <label htmlFor="period_start" className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-300">
+            <label
+              htmlFor="period_start"
+              className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-300"
+            >
               Period Start
             </label>
-            <input id="period_start" name="period_start" type="date" required className={inputClasses} />
+            <input
+              id="period_start"
+              name="period_start"
+              type="date"
+              required
+              className={inputClasses}
+            />
           </div>
           <div>
-            <label htmlFor="period_end" className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-300">
+            <label
+              htmlFor="period_end"
+              className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-300"
+            >
               Period End
             </label>
-            <input id="period_end" name="period_end" type="date" required className={inputClasses} />
+            <input
+              id="period_end"
+              name="period_end"
+              type="date"
+              required
+              className={inputClasses}
+            />
           </div>
           <motion.button
             whileHover={{ scale: 1.01 }}
@@ -115,7 +141,7 @@ function RecordContributionRow({ groupId, cycleId, member, onRecorded }) {
     setError(null);
     const form = new FormData(event.currentTarget);
     setSubmitting(true);
- try {
+    try {
       await api.contributions.record(groupId, cycleId, {
         member_id: member.user_id,
         amount: Number(form.get("amount")),
@@ -124,7 +150,11 @@ function RecordContributionRow({ groupId, cycleId, member, onRecorded }) {
       setOpen(false);
       onRecorded();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Could not record this contribution.");
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : "Could not record this contribution.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -144,7 +174,10 @@ function RecordContributionRow({ groupId, cycleId, member, onRecorded }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-center justify-end">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-2 sm:flex-row sm:items-center justify-end"
+    >
       <input
         name="amount"
         type="number"
@@ -165,23 +198,25 @@ function RecordContributionRow({ groupId, cycleId, member, onRecorded }) {
         <option value="mpesa">M-Pesa</option>
       </select>
       <div className="flex gap-1.5">
-        <button 
-          type="submit" 
-          disabled={submitting} 
+        <button
+          type="submit"
+          disabled={submitting}
           className="inline-flex items-center gap-1 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-60"
         >
           <Save className="h-3 w-3" />
           {submitting ? "..." : "Save"}
         </button>
-        <button 
-          type="button" 
-          onClick={() => setOpen(false)} 
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
           className="rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-700"
         >
           <X className="h-3 w-3" />
         </button>
       </div>
-      {error && <span className="text-xs text-rose-400 font-medium">{error}</span>}
+      {error && (
+        <span className="text-xs text-rose-400 font-medium">{error}</span>
+      )}
     </form>
   );
 }
@@ -193,12 +228,20 @@ export default function CycleDetailPage() {
   const isTreasurer = user?.role === "treasurer";
 
   const { cycles, closeCycle } = useCycles(user?.group_id);
-  const { summary, status, error, refetch } = useCycleSummary(user?.group_id, cycleId === "new" ? null : cycleId);
+  const { summary, status, error, refetch } = useCycleSummary(
+    user?.group_id,
+    cycleId === "new" ? null : cycleId,
+  );
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [closing, setClosing] = useState(false);
 
   if (cycleId === "new") {
-    return <CreateCycleForm groupId={user?.group_id} onCreated={(id) => navigate(`/cycles/${id}`, { replace: true })} />;
+    return (
+      <CreateCycleForm
+        groupId={user?.group_id}
+        onCreated={(id) => navigate(`/cycles/${id}`, { replace: true })}
+      />
+    );
   }
 
   async function handleClose() {
@@ -222,32 +265,40 @@ export default function CycleDetailPage() {
           </div>
           <div>
             <p className="font-bold text-slate-100">{row.full_name}</p>
-            <p className="text-xs font-mono text-slate-400">{row.phone_number}</p>
+            <p className="text-xs font-mono text-slate-400">
+              {row.phone_number}
+            </p>
           </div>
         </div>
       ),
     },
-    { 
-      key: "amount_paid", 
-      header: "Paid", 
-      align: "right", 
-      render: (row) => <span className="font-bold text-emerald-400">{formatKES(row.amount_paid)}</span> 
-    },
-    { 
-      key: "balance_due", 
-      header: "Balance", 
-      align: "right", 
+    {
+      key: "amount_paid",
+      header: "Paid",
+      align: "right",
       render: (row) => (
-        <span className={`font-medium ${row.balance_due > 0 ? "text-amber-400" : "text-slate-400"}`}>
+        <span className="font-bold text-emerald-400">
+          {formatKES(row.amount_paid)}
+        </span>
+      ),
+    },
+    {
+      key: "balance_due",
+      header: "Balance",
+      align: "right",
+      render: (row) => (
+        <span
+          className={`font-medium ${row.balance_due > 0 ? "text-amber-400" : "text-slate-400"}`}
+        >
           {formatKES(row.balance_due)}
         </span>
-      )
+      ),
     },
-    { 
-      key: "status", 
-      header: "Status", 
-      align: "right", 
-      render: (row) => <StatusChip status={row.status} /> 
+    {
+      key: "status",
+      header: "Status",
+      align: "right",
+      render: (row) => <StatusChip status={row.status} />,
     },
     ...(isTreasurer
       ? [
@@ -256,7 +307,12 @@ export default function CycleDetailPage() {
             header: "Quick Action",
             align: "right",
             render: (row) => (
-              <RecordContributionRow groupId={user.group_id} cycleId={cycleId} member={row} onRecorded={refetch} />
+              <RecordContributionRow
+                groupId={user.group_id}
+                cycleId={cycleId}
+                member={row}
+                onRecorded={refetch}
+              />
             ),
           },
         ]
@@ -277,7 +333,9 @@ export default function CycleDetailPage() {
           </div>
           <div className="flex items-center gap-3">
             <h1 className="font-display text-2xl font-black text-white sm:text-3xl tracking-tight">
-              {summary ? `${formatDate(summary.cycle.period_start)} — ${formatDate(summary.cycle.period_end)}` : "Loading cycle..."}
+              {summary
+                ? `${formatDate(summary.cycle.period_start)} — ${formatDate(summary.cycle.period_end)}`
+                : "Loading cycle..."}
             </h1>
             {summary && <StatusChip status={summary.cycle.status} />}
           </div>
@@ -292,13 +350,16 @@ export default function CycleDetailPage() {
               className="flex items-center gap-2 rounded-xl border border-slate-700/80 bg-slate-900/80 px-4 py-2.5 text-xs font-bold text-slate-200 transition-all hover:bg-slate-800 hover:border-slate-600 shadow-md"
             >
               Switch Cycle
-              <ChevronDown className="h-4 w-4 text-slate-400" aria-hidden="true" />
+              <ChevronDown
+                className="h-4 w-4 text-slate-400"
+                aria-hidden="true"
+              />
             </button>
             <AnimatePresence>
               {switcherOpen && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 5 }} 
-                  animate={{ opacity: 1, y: 0 }} 
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 5 }}
                   className="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-slate-700 bg-slate-900 p-1.5 shadow-2xl backdrop-blur-xl"
                 >
@@ -350,8 +411,14 @@ export default function CycleDetailPage() {
 
       {/* Global Errors */}
       {error && (
-        <div role="alert" className="mt-6 flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-medium text-rose-300">
-          <AlertCircle className="h-4 w-4 flex-none text-rose-400" aria-hidden="true" />
+        <div
+          role="alert"
+          className="mt-6 flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-medium text-rose-300"
+        >
+          <AlertCircle
+            className="h-4 w-4 flex-none text-rose-400"
+            aria-hidden="true"
+          />
           <span>{error}</span>
         </div>
       )}
@@ -361,14 +428,44 @@ export default function CycleDetailPage() {
           {/* Summary Metric Grid */}
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4 relative z-10">
             {[
-              { label: "Expected Target", value: summary.financial_summary.total_expected, color: "text-slate-100", border: "border-slate-800" },
-              { label: "Total Collected", value: summary.financial_summary.total_collected, color: "text-emerald-400", border: "border-emerald-500/30 bg-emerald-950/10" },
-              { label: "Outstanding Deficit", value: summary.financial_summary.total_deficit, color: "text-amber-400", border: "border-amber-500/20" },
-              { label: "Target Per Member", value: summary.financial_summary.expected_per_member, color: "text-cyan-400", border: "border-slate-800" },
+              {
+                label: "Expected Target",
+                value: summary.financial_summary.total_expected,
+                color: "text-slate-100",
+                border: "border-slate-800",
+              },
+              {
+                label: "Total Collected",
+                value: summary.financial_summary.total_collected,
+                color: "text-emerald-400",
+                border: "border-emerald-500/30 bg-emerald-950/10",
+              },
+              {
+                label: "Outstanding Deficit",
+                value: summary.financial_summary.total_deficit,
+                color: "text-amber-400",
+                border: "border-amber-500/20",
+              },
+              {
+                label: "Target Per Member",
+                value: summary.financial_summary.expected_per_member,
+                color: "text-cyan-400",
+                border: "border-slate-800",
+              },
             ].map((stat, i) => (
-              <GlassCard key={stat.label} index={i} className={`p-5 border-slate-800/80 bg-slate-900/60 backdrop-blur-xl ${stat.border}`}>
-                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">{stat.label}</p>
-                <p className={`mt-2 font-display text-2xl font-black ${stat.color}`}>{formatKES(stat.value)}</p>
+              <GlassCard
+                key={stat.label}
+                index={i}
+                className={`p-5 border-slate-800/80 bg-slate-900/60 backdrop-blur-xl ${stat.border}`}
+              >
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  {stat.label}
+                </p>
+                <p
+                  className={`mt-2 font-display text-2xl font-black ${stat.color}`}
+                >
+                  {formatKES(stat.value)}
+                </p>
               </GlassCard>
             ))}
           </div>
@@ -390,14 +487,19 @@ export default function CycleDetailPage() {
           </div>
 
           {/* Member Breakdown Table */}
-          <GlassCard index={4} className="mt-8 border-slate-800/80 bg-slate-900/60 p-6 backdrop-blur-xl relative z-10 shadow-2xl">
+          <GlassCard
+            index={4}
+            className="mt-8 border-slate-800/80 bg-slate-900/60 p-6 backdrop-blur-xl relative z-10 shadow-2xl"
+          >
             <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
               <div>
                 <h2 className="font-display text-lg font-bold text-white tracking-tight flex items-center gap-2">
-                  <PieChart className="h-5 w-5 text-emerald-400" /> Member Ledger Roster
+                  <PieChart className="h-5 w-5 text-emerald-400" /> Member
+                  Ledger Roster
                 </h2>
                 <p className="mt-0.5 text-xs text-slate-400">
-                  Individual payment metrics and balance tracking for this contribution window.
+                  Individual payment metrics and balance tracking for this
+                  contribution window.
                 </p>
               </div>
             </div>

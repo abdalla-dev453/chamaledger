@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, CheckCircle, HandCoins, Plus, X } from "lucide-react";
-import { useEffect, useNavigate, useParams, useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import GlassCard from "../components/ui/GlassCard";
 import StatusChip from "../components/ui/StatusChip";
 import Table from "../components/ui/Table";
