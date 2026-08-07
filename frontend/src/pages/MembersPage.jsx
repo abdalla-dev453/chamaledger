@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { Check, Copy, ShieldCheck, UserX, UserCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Check, 
+  Copy, 
+  ShieldCheck, 
+  UserX, 
+  UserCheck,
+  Users,
+  QrCode,
+  ShieldAlert,
+  UserCog
+} from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useMembers } from "../hooks/useMembers";
 import { formatDate } from "../utils/formatters";
@@ -16,26 +27,51 @@ function InviteCard({ groupId, index }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard access can be denied by the browser; the ID is still visible to copy manually.
+      // Clipboard access can be denied by the browser; fallback handled silently
     }
   }
 
   return (
-    <GlassCard index={index} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <p className="font-display text-lg font-semibold">Invite new members</p>
-        <p className="mt-1 text-sm text-white/55">
-          Share this Group ID — new members enter it when they create their account.
-        </p>
+    <GlassCard index={index} className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-emerald-500/30 bg-emerald-950/10 p-6 backdrop-blur-xl shadow-lg shadow-emerald-900/10 relative overflow-hidden">
+      {/* Background flare */}
+      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-emerald-500/20 blur-[50px] pointer-events-none" />
+      
+      <div className="flex items-start gap-4 z-10">
+        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 mt-1">
+          <QrCode className="h-6 w-6" />
+        </div>
+        <div>
+          <h3 className="font-display text-lg font-bold text-white tracking-tight">Invite New Members</h3>
+          <p className="mt-1 text-xs font-medium text-slate-400 max-w-sm leading-relaxed">
+            Share this secure Group ID. New members will enter it during account creation to automatically join your ledger.
+          </p>
+        </div>
       </div>
-      <button
+      
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         type="button"
         onClick={handleCopy}
-        className="flex flex-none items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 font-mono text-sm text-white transition-colors hover:bg-white/15"
+        className={`z-10 flex flex-none items-center gap-2.5 rounded-xl px-5 py-3 font-mono text-sm font-bold transition-all duration-300 shadow-md ${
+          copied 
+            ? "bg-emerald-500 text-slate-950 shadow-emerald-500/20" 
+            : "bg-slate-800 text-slate-200 hover:bg-slate-700 hover:text-white border border-slate-700"
+        }`}
       >
         {groupId}
-        {copied ? <Check className="h-4 w-4 text-[var(--color-gain-400)]" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
-      </button>
+        <AnimatePresence mode="wait">
+          {copied ? (
+            <motion.div key="check" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+              <Check className="h-4 w-4" aria-hidden="true" />
+            </motion.div>
+          ) : (
+            <motion.div key="copy" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}>
+              <Copy className="h-4 w-4 text-slate-400" aria-hidden="true" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.button>
     </GlassCard>
   );
 }
@@ -68,19 +104,28 @@ function MemberRoleControl({ member, onUpdateMember }) {
         type="button"
         onClick={toggleRole}
         disabled={saving}
-        title={member.role === "treasurer" ? "Demote to member" : "Promote to treasurer"}
-        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
+        title={member.role === "treasurer" ? "Demote to standard member" : "Promote to Treasurer"}
+        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all duration-200 disabled:opacity-50 ${
+          member.role === "treasurer"
+            ? "border-amber-500/30 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300"
+            : "border-slate-700 bg-slate-800/50 text-slate-400 hover:bg-slate-700 hover:text-emerald-400 hover:border-emerald-500/50"
+        }`}
       >
-        <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+        {member.role === "treasurer" ? <ShieldAlert className="h-4 w-4" /> : <ShieldCheck className="h-4 w-4" />}
       </button>
+      
       <button
         type="button"
         onClick={toggleActive}
         disabled={saving}
-        title={member.is_active ? "Deactivate member" : "Reactivate member"}
-        className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-white/60 transition-colors hover:bg-white/10 hover:text-white disabled:opacity-50"
+        title={member.is_active ? "Deactivate member account" : "Reactivate member account"}
+        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all duration-200 disabled:opacity-50 ${
+          member.is_active
+            ? "border-slate-700 bg-slate-800/50 text-slate-400 hover:bg-rose-500/20 hover:text-rose-400 hover:border-rose-500/50"
+            : "border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 hover:text-rose-300"
+        }`}
       >
-        {member.is_active ? <UserX className="h-4 w-4" aria-hidden="true" /> : <UserCheck className="h-4 w-4" aria-hidden="true" />}
+        {member.is_active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
       </button>
     </div>
   );
@@ -94,39 +139,78 @@ export default function MembersPage() {
   const columns = [
     {
       key: "member",
-      header: "Member",
+      header: "Member Profile",
       render: (row) => (
-        <div>
-          <p className="font-medium text-white">{row.full_name}</p>
-          <p className="text-xs text-white/45">{row.phone_number}</p>
+        <div className="flex items-center gap-3 py-1">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-tr from-slate-800 to-slate-700 border border-slate-600 text-xs font-bold text-slate-200 shadow-inner">
+            {row.full_name?.substring(0, 2).toUpperCase() || "MB"}
+          </div>
+          <div>
+            <p className="font-bold text-slate-100">{row.full_name}</p>
+            <p className="text-xs font-medium text-slate-400">{row.phone_number}</p>
+          </div>
         </div>
       ),
     },
-    { key: "role", header: "Role", render: (row) => <span className="capitalize text-white/70">{row.role}</span> },
-    { key: "joined_on", header: "Joined", render: (row) => formatDate(row.joined_on) },
-    { key: "status", header: "Status", render: (row) => <StatusChip status={row.is_active ? "active" : "closed"} /> },
+    { 
+      key: "role", 
+      header: "Role Level", 
+      render: (row) => (
+        row.role === "treasurer" 
+          ? <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20"><ShieldCheck className="h-3.5 w-3.5"/> Treasurer</span>
+          : <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 capitalize"><UserCog className="h-3.5 w-3.5"/> Member</span>
+      ) 
+    },
+    { 
+      key: "joined_on", 
+      header: "Joined Date", 
+      render: (row) => <span className="text-sm font-medium text-slate-300">{formatDate(row.joined_on)}</span> 
+    },
+    { 
+      key: "status", 
+      header: "Status", 
+      render: (row) => <StatusChip status={row.is_active ? "active" : "closed"} /> 
+    },
     ...(isTreasurer
-      ? [{ key: "actions", header: "", align: "right", render: (row) => <MemberRoleControl member={row} onUpdateMember={updateMember} /> }]
+      ? [{ key: "actions", header: "Management", align: "right", render: (row) => <MemberRoleControl member={row} onUpdateMember={updateMember} /> }]
       : []),
   ];
 
   return (
-    <div className="pb-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--color-plum-300)]">Your circle</p>
-      <h1 className="mt-1 font-display text-3xl font-semibold">Members</h1>
+    <div className="relative min-h-screen text-slate-100 pb-12">
+      {/* Atmospheric Glow */}
+      <div className="pointer-events-none absolute top-10 left-1/4 h-[400px] w-[400px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-[120px]" />
 
-      {isTreasurer && <div className="mt-6"><InviteCard groupId={user.group_id} index={0} /></div>}
+      {/* Header */}
+      <div className="border-b border-slate-800 pb-6 relative z-10">
+        <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-bold text-cyan-400 mb-2">
+          <Users className="h-3.5 w-3.5" /> Group Directory
+        </div>
+        <h1 className="font-display text-3xl font-black text-white sm:text-4xl tracking-tight">Members & Roles</h1>
+        <p className="mt-1 text-xs text-slate-400 font-medium">Manage your circle's directory, verify roles, and monitor account statuses.</p>
+      </div>
 
-      {error && <p className="mt-6 text-sm text-[var(--color-rose-300)]">{error}</p>}
+      {isTreasurer && (
+        <div className="mt-8 relative z-10">
+          <InviteCard groupId={user.group_id} index={0} />
+        </div>
+      )}
 
-      <GlassCard index={1} className="mt-6">
+      {error && (
+        <div className="mt-6 rounded-xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300 font-medium shadow-lg">
+          {error}
+        </div>
+      )}
+
+      {/* Main Table */}
+      <GlassCard index={1} className="mt-8 border-slate-800/80 bg-slate-900/60 p-6 backdrop-blur-xl relative z-10 shadow-2xl">
         <div className="overflow-x-auto">
           <Table
             columns={columns}
             rows={members}
             caption="Group members and their roles"
             isLoading={status === "loading"}
-            emptyMessage="No members yet."
+            emptyMessage="No members are currently listed in this group."
           />
         </div>
       </GlassCard>

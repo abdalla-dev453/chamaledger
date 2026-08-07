@@ -9,31 +9,51 @@ const TONE_MAP = {
   disbursed: "gain",
   cleared: "gain",
   exact: "gain",
+  approved: "gain",
+  paid: "gain",
+
   // neutral / in-progress
   pending: "gold",
   ambiguous: "gold",
+  review: "gold",
   closed: "neutral",
   archived: "neutral",
-  // needs attention
+
+  // needs attention / negative
   late: "rose",
   flagged: "rose",
   defaulted: "rose",
   unmatched: "rose",
+  rejected: "rose",
+  overdue: "rose",
 };
 
 const TONE_CLASSES = {
-  gain: "bg-[var(--color-gain-500)]/15 text-[var(--color-gain-400)] ring-[var(--color-gain-500)]/25",
-  rose: "bg-[var(--color-rose-500)]/15 text-[var(--color-rose-400)] ring-[var(--color-rose-500)]/25",
-  gold: "bg-[var(--color-gold-400)]/15 text-[var(--color-gold-300)] ring-[var(--color-gold-400)]/25",
-  neutral: "bg-white/10 text-white/60 ring-white/15",
+  gain: `
+    bg-emerald-50 text-emerald-700 border-emerald-200
+    dark:bg-emerald-500/15 dark:text-emerald-400 dark:border-emerald-500/20
+  `,
+  rose: `
+    bg-rose-50 text-rose-700 border-rose-200
+    dark:bg-rose-500/15 dark:text-rose-400 dark:border-rose-500/20
+  `,
+  gold: `
+    bg-amber-50 text-amber-700 border-amber-200
+    dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/20
+  `,
+  neutral: `
+    bg-slate-100 text-slate-700 border-slate-200
+    dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700/60
+  `,
 };
 
 /** Small color-coded pill for any status/enum string returned by the API. */
 export default function StatusChip({ status, className = "" }) {
-  const tone = TONE_MAP[status] ?? "neutral";
+  const tone = TONE_MAP[status?.toLowerCase()] ?? "neutral";
+
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${TONE_CLASSES[tone]} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold backdrop-blur-md transition-colors duration-200 ${TONE_CLASSES[tone]} ${className}`}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
       {formatStatusLabel(status)}
