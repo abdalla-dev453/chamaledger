@@ -4,7 +4,7 @@ from app.models.enums import (
     CycleStatus,
     LoanStatus,
     MatchConfidence,
-    UserRole
+    UserRole,
 )
 from app.models.group import Group
 from app.models.user import User
@@ -12,6 +12,7 @@ from app.models.cycle import Cycle
 from app.models.loan import Loan, Repayment
 from app.models.contribution import Contribution
 from app.models.mpesa import MpesaStatement
+from app.models.mpesa_tx import MpesaTransaction
 
 __all__ = [
     "UserRole",
@@ -27,4 +28,5 @@ __all__ = [
     "Repayment",
     "Contribution",
     "MpesaStatement",
+    "MpesaTransaction",
 ]

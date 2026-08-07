@@ -184,6 +184,9 @@ function IssueLoanForm({ groupId, onClose, onIssued }) {
 function RepayForm({ groupId, loanId, onRepaid }) {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [stkSending, setStkSending] = useState(false);
+  const [stkMessage, setStkMessage] = useState(null);
+  const user = useAuthStore((s) => s.user);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -205,6 +208,31 @@ function RepayForm({ groupId, loanId, onRepaid }) {
       );
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleStkPush(amount) {
+    setError(null);
+    setStkMessage(null);
+    setStkSending(true);
+    try {
+      const resp = await api.mpesa.stkPush({
+        amount: Number(amount),
+        phone: user?.phone_number,
+        purpose: "repayment",
+        target_id: loanId,
+      });
+      setStkMessage(
+        resp && (resp.CheckoutRequestID || resp.checkout_request_id)
+          ? `STK push initiated. CheckoutRequestID: ${resp.CheckoutRequestID || resp.checkout_request_id}`
+          : "STK push initiated. Follow your phone prompt.",
+      );
+    } catch (err) {
+      setError(
+        err instanceof ApiError ? err.message : "Could not initiate STK push.",
+      );
+    } finally {
+      setStkSending(false);
     }
   }
 
@@ -235,8 +263,26 @@ function RepayForm({ groupId, loanId, onRepaid }) {
       >
         {submitting ? "Processing…" : "Record Repayment"}
       </button>
+      <button
+        type="button"
+        disabled={stkSending}
+        onClick={() => {
+          const form = document.querySelector("form");
+          const amt = form?.querySelector('input[name="amount"]')?.value;
+          if (!amt) return setError("Enter an amount to request STK push");
+          handleStkPush(amt);
+        }}
+        className="w-full sm:w-auto ml-2 flex-none rounded-xl border border-emerald-500 px-6 py-2.5 text-sm font-bold text-emerald-300 hover:bg-emerald-900/10 transition disabled:opacity-60"
+      >
+        {stkSending ? "Requesting STK…" : "Pay with M-Pesa"}
+      </button>
       {error && (
         <span className="text-xs font-semibold text-rose-400">{error}</span>
+      )}
+      {stkMessage && (
+        <span className="text-xs font-semibold text-emerald-300">
+          {stkMessage}
+        </span>
       )}
     </form>
   );
