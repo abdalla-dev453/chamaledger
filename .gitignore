@@ -1,0 +1,11 @@
+.bashrc
+.zshrc
+.bash_profile
+.zprofile
+.profile
+.gitconfig
+.mcp.json
+.claude/
+.vscode/
+.idea/
+.ripgreprc
